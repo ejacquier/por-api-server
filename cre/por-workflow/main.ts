@@ -1,383 +1,181 @@
 import {
-	bytesToHex,
-	ConsensusAggregationByFields,
-	type CronPayload,
 	handler,
-	CronCapability,
-	EVMClient,
+	HTTPCapability,
 	HTTPClient,
-	type EVMLog,
-	encodeCallMsg,
-	getNetwork,
+	type HTTPPayload,
 	type HTTPSendRequester,
-	hexToBase64,
-	LAST_FINALIZED_BLOCK_NUMBER,
-	median,
 	Runner,
 	type Runtime,
-	TxStatus,
+	decodeJson,
+	ConsensusAggregationByFields,
+	median,
 } from '@chainlink/cre-sdk'
-import { type Address, decodeFunctionResult, encodeFunctionData, zeroAddress } from 'viem'
 import { z } from 'zod'
-import { BalanceReader, IERC20, MessageEmitter, ReserveManager } from '../contracts/abi'
 
+// Config schema - simplified to only require authorized keys for HTTP trigger
 const configSchema = z.object({
-	schedule: z.string(),
-	url: z.string(),
-	evms: z.array(
+	authorizedKeys: z.array(
 		z.object({
-			tokenAddress: z.string(),
-			porAddress: z.string(),
-			proxyAddress: z.string(),
-			balanceReaderAddress: z.string(),
-			messageEmitterAddress: z.string(),
-			chainSelectorName: z.string(),
-			gasLimit: z.string(),
+			type: z.enum(['KEY_TYPE_UNSPECIFIED', 'KEY_TYPE_ECDSA_EVM']),
+			publicKey: z.string(),
 		}),
 	),
 })
 
 type Config = z.infer<typeof configSchema>
 
-interface PORResponse {
-	accountName: string
-	totalTrust: number
-	totalToken: number
-	ripcord: boolean
-	updatedAt: string
+// Payload received from HTTP trigger
+interface TriggerPayload {
+	testCase: string
+	url: string
 }
 
+// API response format from por-api-server
+interface APIAsset {
+	assetId: string
+	name: string
+	totalSupply: string
+	totalReserves: string
+	reserveRatio: number
+	unit: string
+	lastUpdated: string
+}
+
+interface APIResponse {
+	timestamp: string
+	assets: APIAsset[]
+	status: string
+	padding?: string
+}
+
+// Result of fetching reserve info
 interface ReserveInfo {
 	lastUpdated: Date
-	totalReserve: number
+	totalReserves: number
+	totalSupply: number
 }
 
-// Utility function to safely stringify objects with bigints
-const safeJsonStringify = (obj: any): string =>
-	JSON.stringify(obj, (_, value) => (typeof value === 'bigint' ? value.toString() : value), 2)
+// Workflow result returned to caller
+interface WorkflowResult {
+	testCase: string
+	url: string
+	success: boolean
+	statusCode?: number
+	error?: string
+	data?: ReserveInfo
+}
 
-const fetchReserveInfo = (sendRequester: HTTPSendRequester, config: Config): ReserveInfo => {
-	const response = sendRequester.sendRequest({ method: 'GET', url: config.url }).result()
+// Utility function to safely stringify objects with bigints and dates
+const safeJsonStringify = (obj: unknown): string =>
+	JSON.stringify(
+		obj,
+		(_, value) => {
+			if (typeof value === 'bigint') return value.toString()
+			if (value instanceof Date) return value.toISOString()
+			return value
+		},
+		2,
+	)
+
+// Function to fetch reserve info from the given URL
+const fetchReserveInfo = (
+	sendRequester: HTTPSendRequester,
+	params: { url: string },
+): ReserveInfo => {
+	const response = sendRequester.sendRequest({ method: 'GET', url: params.url }).result()
 
 	if (response.statusCode !== 200) {
 		throw new Error(`HTTP request failed with status: ${response.statusCode}`)
 	}
 
 	const responseText = Buffer.from(response.body).toString('utf-8')
-	const porResp: PORResponse = JSON.parse(responseText)
+	const apiResp: APIResponse = JSON.parse(responseText)
 
-	if (porResp.ripcord) {
-		throw new Error('ripcord is true')
+	// Extract totals from assets array
+	let totalReserves = 0
+	let totalSupply = 0
+	for (const asset of apiResp.assets) {
+		totalReserves += Number(asset.totalReserves)
+		totalSupply += Number(asset.totalSupply)
 	}
 
 	return {
-		lastUpdated: new Date(porResp.updatedAt),
-		totalReserve: porResp.totalToken,
+		lastUpdated: new Date(apiResp.timestamp),
+		totalReserves,
+		totalSupply,
 	}
 }
 
-const fetchNativeTokenBalance = (
-	runtime: Runtime<Config>,
-	evmConfig: Config['evms'][0],
-	tokenHolderAddress: string,
-): bigint => {
-	const network = getNetwork({
-		chainFamily: 'evm',
-		chainSelectorName: evmConfig.chainSelectorName,
-		isTestnet: true,
-	})
+// HTTP trigger callback - processes test case requests
+const onHttpTrigger = (runtime: Runtime<Config>, payload: HTTPPayload): string => {
+	// Decode the input payload
+	const input = decodeJson(payload.input) as TriggerPayload
 
-	if (!network) {
-		throw new Error(`Network not found for chain selector name: ${evmConfig.chainSelectorName}`)
+	// Validate required fields
+	if (!input.testCase) {
+		throw new Error('Missing required field: testCase')
+	}
+	if (!input.url) {
+		throw new Error('Missing required field: url')
 	}
 
-	const evmClient = new EVMClient(network.chainSelector.selector)
+	// Log the test case at the start
+	runtime.log(`Starting test case: ${input.testCase}`)
+	runtime.log(`URL: ${input.url}`)
 
-	// Encode the contract call data for getNativeBalances
-	const callData = encodeFunctionData({
-		abi: BalanceReader,
-		functionName: 'getNativeBalances',
-		args: [[tokenHolderAddress as Address]],
-	})
-
-	const contractCall = evmClient
-		.callContract(runtime, {
-			call: encodeCallMsg({
-				from: zeroAddress,
-				to: evmConfig.balanceReaderAddress as Address,
-				data: callData,
-			}),
-			blockNumber: LAST_FINALIZED_BLOCK_NUMBER,
-		})
-		.result()
-
-	// Decode the result
-	const balances = decodeFunctionResult({
-		abi: BalanceReader,
-		functionName: 'getNativeBalances',
-		data: bytesToHex(contractCall.data),
-	})
-
-	if (!balances || balances.length === 0) {
-		throw new Error('No balances returned from contract')
+	const result: WorkflowResult = {
+		testCase: input.testCase,
+		url: input.url,
+		success: false,
 	}
 
-	return balances[0]
-}
+	try {
+		// Create HTTP client and fetch data
+		const httpClient = new HTTPClient()
 
-const getTotalSupply = (runtime: Runtime<Config>): bigint => {
-	const evms = runtime.config.evms
-	let totalSupply = 0n
+		runtime.log(`Fetching data from URL...`)
 
-	for (const evmConfig of evms) {
-		const network = getNetwork({
-			chainFamily: 'evm',
-			chainSelectorName: evmConfig.chainSelectorName,
-			isTestnet: true,
-		})
-
-		if (!network) {
-			throw new Error(`Network not found for chain selector name: ${evmConfig.chainSelectorName}`)
-		}
-
-		const evmClient = new EVMClient(network.chainSelector.selector)
-
-		// Encode the contract call data for totalSupply
-		const callData = encodeFunctionData({
-			abi: IERC20,
-			functionName: 'totalSupply',
-		})
-
-		const contractCall = evmClient
-			.callContract(runtime, {
-				call: encodeCallMsg({
-					from: zeroAddress,
-					to: evmConfig.tokenAddress as Address,
-					data: callData,
+		const reserveInfo = httpClient
+			.sendRequest(
+				runtime,
+				fetchReserveInfo,
+				ConsensusAggregationByFields<ReserveInfo>({
+					lastUpdated: median,
+					totalReserves: median,
+					totalSupply: median,
 				}),
-				blockNumber: LAST_FINALIZED_BLOCK_NUMBER,
-			})
+			)({ url: input.url })
 			.result()
 
-		// Decode the result
-		const supply = decodeFunctionResult({
-			abi: IERC20,
-			functionName: 'totalSupply',
-			data: bytesToHex(contractCall.data),
-		})
+		runtime.log(`Successfully fetched reserve info`)
+		runtime.log(`Reserve Info: ${safeJsonStringify(reserveInfo)}`)
 
-		totalSupply += supply
+		result.success = true
+		result.statusCode = 200
+		result.data = reserveInfo
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error)
+		runtime.log(`Test case failed with error: ${errorMessage}`)
+		result.success = false
+		result.error = errorMessage
 	}
 
-	return totalSupply
+	runtime.log(`Test case ${input.testCase} completed`)
+	runtime.log(`Success: ${result.success}`)
+
+	return safeJsonStringify(result)
 }
 
-const updateReserves = (
-	runtime: Runtime<Config>,
-	totalSupply: bigint,
-	totalReserveScaled: bigint,
-): string => {
-	const evmConfig = runtime.config.evms[0]
-	const network = getNetwork({
-		chainFamily: 'evm',
-		chainSelectorName: evmConfig.chainSelectorName,
-		isTestnet: true,
-	})
-
-	if (!network) {
-		throw new Error(`Network not found for chain selector name: ${evmConfig.chainSelectorName}`)
-	}
-
-	const evmClient = new EVMClient(network.chainSelector.selector)
-
-	runtime.log(
-		`Updating reserves totalSupply ${totalSupply.toString()} totalReserveScaled ${totalReserveScaled.toString()}`,
-	)
-
-	// Encode the contract call data for updateReserves
-	const callData = encodeFunctionData({
-		abi: ReserveManager,
-		functionName: 'updateReserves',
-		args: [
-			{
-				totalMinted: totalSupply,
-				totalReserve: totalReserveScaled,
-			},
-		],
-	})
-
-	// Step 1: Generate report using consensus capability
-	const reportResponse = runtime
-		.report({
-			encodedPayload: hexToBase64(callData),
-			encoderName: 'evm',
-			signingAlgo: 'ecdsa',
-			hashingAlgo: 'keccak256',
-		})
-		.result()
-
-	const resp = evmClient
-		.writeReport(runtime, {
-			receiver: evmConfig.proxyAddress,
-			report: reportResponse,
-			gasConfig: {
-				gasLimit: evmConfig.gasLimit,
-			},
-		})
-		.result()
-
-	const txStatus = resp.txStatus
-
-	if (txStatus !== TxStatus.SUCCESS) {
-		throw new Error(`Failed to write report: ${resp.errorMessage || txStatus}`)
-	}
-
-	const txHash = resp.txHash || new Uint8Array(32)
-
-	runtime.log(`Write report transaction succeeded at txHash: ${bytesToHex(txHash)}`)
-
-	return txHash.toString()
-}
-
-const doPOR = (runtime: Runtime<Config>): string => {
-	runtime.log(`fetching por url ${runtime.config.url}`)
-
-	const httpCapability = new HTTPClient()
-	const reserveInfo = httpCapability
-		.sendRequest(
-			runtime,
-			fetchReserveInfo,
-			ConsensusAggregationByFields<ReserveInfo>({
-				lastUpdated: median,
-				totalReserve: median,
-			}),
-		)(runtime.config)
-		.result()
-
-	runtime.log(`ReserveInfo ${safeJsonStringify(reserveInfo)}`)
-
-	const totalSupply = getTotalSupply(runtime)
-	runtime.log(`TotalSupply ${totalSupply.toString()}`)
-
-	const totalReserveScaled = BigInt(reserveInfo.totalReserve * 1e18)
-	runtime.log(`TotalReserveScaled ${totalReserveScaled.toString()}`)
-
-	const nativeTokenBalance = fetchNativeTokenBalance(
-		runtime,
-		runtime.config.evms[0],
-		runtime.config.evms[0].tokenAddress,
-	)
-	runtime.log(`NativeTokenBalance ${nativeTokenBalance.toString()}`)
-
-	updateReserves(runtime, totalSupply, totalReserveScaled)
-
-	return reserveInfo.totalReserve.toString()
-}
-
-const getLastMessage = (
-	runtime: Runtime<Config>,
-	evmConfig: Config['evms'][0],
-	emitter: string,
-): string => {
-	const network = getNetwork({
-		chainFamily: 'evm',
-		chainSelectorName: evmConfig.chainSelectorName,
-		isTestnet: true,
-	})
-
-	if (!network) {
-		throw new Error(`Network not found for chain selector name: ${evmConfig.chainSelectorName}`)
-	}
-
-	const evmClient = new EVMClient(network.chainSelector.selector)
-
-	// Encode the contract call data for getLastMessage
-	const callData = encodeFunctionData({
-		abi: MessageEmitter,
-		functionName: 'getLastMessage',
-		args: [emitter as Address],
-	})
-
-	const contractCall = evmClient
-		.callContract(runtime, {
-			call: encodeCallMsg({
-				from: zeroAddress,
-				to: evmConfig.messageEmitterAddress as Address,
-				data: callData,
-			}),
-			blockNumber: LAST_FINALIZED_BLOCK_NUMBER,
-		})
-		.result()
-
-	// Decode the result
-	const message = decodeFunctionResult({
-		abi: MessageEmitter,
-		functionName: 'getLastMessage',
-		data: bytesToHex(contractCall.data),
-	})
-
-	return message
-}
-
-const onCronTrigger = (runtime: Runtime<Config>, payload: CronPayload): string => {
-	if (!payload.scheduledExecutionTime) {
-		throw new Error('Scheduled execution time is required')
-	}
-
-	runtime.log('Running CronTrigger')
-
-	return doPOR(runtime)
-}
-
-const onLogTrigger = (runtime: Runtime<Config>, payload: EVMLog): string => {
-	runtime.log('Running LogTrigger')
-
-	const topics = payload.topics
-
-	if (topics.length < 3) {
-		runtime.log('Log payload does not contain enough topics')
-		throw new Error(`log payload does not contain enough topics ${topics.length}`)
-	}
-
-	// topics[1] is a 32-byte topic, but the address is the last 20 bytes
-	const emitter = bytesToHex(topics[1].slice(12))
-	runtime.log(`Emitter ${emitter}`)
-
-	const message = getLastMessage(runtime, runtime.config.evms[0], emitter)
-
-	runtime.log(`Message retrieved from the contract ${message}`)
-
-	return message
-}
-
+// Initialize the workflow with HTTP trigger
 const initWorkflow = (config: Config) => {
-	const cronTrigger = new CronCapability()
-	const network = getNetwork({
-		chainFamily: 'evm',
-		chainSelectorName: config.evms[0].chainSelectorName,
-		isTestnet: true,
-	})
-
-	if (!network) {
-		throw new Error(
-			`Network not found for chain selector name: ${config.evms[0].chainSelectorName}`,
-		)
-	}
-
-	const evmClient = new EVMClient(network.chainSelector.selector)
+	const httpCapability = new HTTPCapability()
 
 	return [
 		handler(
-			cronTrigger.trigger({
-				schedule: config.schedule,
+			httpCapability.trigger({
+				authorizedKeys: config.authorizedKeys,
 			}),
-			onCronTrigger,
-		),
-		handler(
-			evmClient.logTrigger({
-				addresses: [config.evms[0].messageEmitterAddress],
-			}),
-			onLogTrigger,
+			onHttpTrigger,
 		),
 	]
 }
