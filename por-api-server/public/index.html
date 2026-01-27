@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRE Proof of Reserve API - Test Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1f3c 0%, #0a0e1a 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #375bd2 0%, #1a3a8f 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .chainlink-logo {
+            height: 50px;
+            width: auto;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .cre-link {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .cre-link:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .hero-info {
+            background: #f0f4ff;
+            padding: 25px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .hero-info h2 {
+            color: #375bd2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .limits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .limit-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #375bd2;
+        }
+
+        .limit-card h4 {
+            color: #333;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .limit-card .value {
+            color: #375bd2;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #375bd2;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #375bd2;
+            font-size: 1.5em;
+        }
+
+        .section-description {
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .test-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .test-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #375bd2;
+        }
+
+        .test-card h3 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .test-card p {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .test-card a {
+            display: inline-block;
+            background: linear-gradient(135deg, #375bd2 0%, #1a3a8f 100%);
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .test-card a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(55, 91, 210, 0.4);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .health-check {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .health-check h3 {
+            margin-bottom: 10px;
+        }
+
+        .health-check a {
+            display: inline-block;
+            background: white;
+            color: #28a745;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .health-check a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .url-list {
+            background: #f8f9fa;
+            border: 2px solid #375bd2;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .url-list h2 {
+            color: #375bd2;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .url-list p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .url-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .url-item:hover {
+            background: #f0f0f0;
+            border-color: #375bd2;
+        }
+
+        .url-name {
+            font-weight: bold;
+            color: #333;
+            min-width: 200px;
+        }
+
+        .url-link {
+            color: #375bd2;
+            flex-grow: 1;
+            padding: 0 10px;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: #375bd2;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #1a3a8f;
+            transform: scale(1.05);
+        }
+
+        .copy-btn:active {
+            background: #28a745;
+        }
+
+        footer {
+            background: #1a1f3c;
+            padding: 25px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        footer a {
+            color: #7b93db;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        footer p {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <svg class="chainlink-logo" viewBox="0 0 37.8 43.6" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.9 0l-4 2.3L4 8.6l-4 2.3v21.8l4 2.3L14.9 41l4 2.3 4-2.3 10.9-6.3 4-2.3V10.6l-4-2.3L22.9 2 18.9 0zM8 28.1V15.5l10.9-6.3 10.9 6.3v12.6l-10.9 6.3L8 28.1z" fill="white"/>
+                </svg>
+                <h1>CRE Proof of Reserve API</h1>
+            </div>
+            <p>Test server for Chainlink Runtime Environment (CRE) workflow development</p>
+            <a href="https://chain.link/cre" target="_blank" class="cre-link">Learn more about Chainlink CRE</a>
+        </header>
+
+        <div class="hero-info">
+            <h2>CRE Limits Being Tested</h2>
+            <div class="limits-grid">
+                <div class="limit-card">
+                    <h4>HTTP Response Size</h4>
+                    <div class="value">100 KB</div>
+                </div>
+                <div class="limit-card">
+                    <h4>Connection Timeout</h4>
+                    <div class="value">10 sec</div>
+                </div>
+                <div class="limit-card">
+                    <h4>Capability Timeout</h4>
+                    <div class="value">3 min</div>
+                </div>
+                <div class="limit-card">
+                    <h4>Request Payload</h4>
+                    <div class="value">10 KB</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Health Check -->
+            <div class="health-check">
+                <h3>Server Health Check</h3>
+                <a href="/health" target="_blank">Check Server Status</a>
+            </div>
+
+            <!-- Normal Case -->
+            <div class="section">
+                <h2>Normal Response</h2>
+                <p class="section-description">Control test case - should always work</p>
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h3>Normal Response <span class="badge badge-success">Should Work</span></h3>
+                        <p>Returns standard proof of reserve data with all assets fully backed.</p>
+                        <a href="/api/reserves/" target="_blank">Test Normal Response</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Size Limit Tests -->
+            <div class="section">
+                <h2>Size Limit Tests</h2>
+                <p class="section-description">Testing CRE's 100 KB HTTP response size limit</p>
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h3>Under Limit (99 KB) <span class="badge badge-success">Should Work</span></h3>
+                        <p>Response just under the 100 KB limit.</p>
+                        <a href="/api/reserves/?scenario=under_limit" target="_blank">Test Under Limit</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>At Limit (100 KB) <span class="badge badge-warning">Edge Case</span></h3>
+                        <p>Response exactly at the 100 KB limit.</p>
+                        <a href="/api/reserves/?scenario=at_limit" target="_blank">Test At Limit</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Exceeds Limit (150 KB) <span class="badge badge-danger">Should Fail</span></h3>
+                        <p>Response exceeds the 100 KB limit - CRE should reject.</p>
+                        <a href="/api/reserves/?scenario=exceeds_limit" target="_blank">Test Exceeds Limit</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Way Over Limit (500 KB) <span class="badge badge-danger">Should Fail</span></h3>
+                        <p>Response way over the limit - definitely fails in CRE.</p>
+                        <a href="/api/reserves/?scenario=way_over_limit" target="_blank">Test Way Over</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Custom Size (200 KB) <span class="badge badge-danger">Should Fail</span></h3>
+                        <p>Custom 200 KB response for testing.</p>
+                        <a href="/api/reserves/?size=200" target="_blank">Test 200 KB</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeout Tests -->
+            <div class="section">
+                <h2>Timeout Tests</h2>
+                <p class="section-description">Testing CRE's 10 second connection timeout and 3 minute capability timeout</p>
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h3>Connection Timeout (11s) <span class="badge badge-danger">Should Timeout</span></h3>
+                        <p>11 second delay - exceeds 10 second connection timeout.</p>
+                        <a href="/api/reserves/?scenario=connection_timeout" target="_blank">Test Connection Timeout</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Capability Timeout (3.5m) <span class="badge badge-danger">Should Timeout</span></h3>
+                        <p>3.5 minute delay - exceeds capability timeout. Very slow!</p>
+                        <a href="/api/reserves/?scenario=capability_timeout" target="_blank">Test Capability Timeout</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Under Connection Timeout (9s) <span class="badge badge-success">Should Work</span></h3>
+                        <p>9 second delay - just under connection timeout.</p>
+                        <a href="/api/reserves/?scenario=under_connection_timeout" target="_blank">Test 9s Delay</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Under Capability Timeout (2.5m) <span class="badge badge-success">Should Work</span></h3>
+                        <p>2.5 minute delay - under capability timeout. Slow!</p>
+                        <a href="/api/reserves/?scenario=under_capability_timeout" target="_blank">Test 2.5m Delay</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Short Delay (2s) <span class="badge badge-success">Should Work</span></h3>
+                        <p>2 second delay for quick timeout testing.</p>
+                        <a href="/api/reserves/?delay=2000" target="_blank">Test 2s Delay</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Medium Delay (5s) <span class="badge badge-success">Should Work</span></h3>
+                        <p>5 second delay for moderate timeout testing.</p>
+                        <a href="/api/reserves/?delay=5000" target="_blank">Test 5s Delay</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HTTP Error Tests -->
+            <div class="section">
+                <h2>HTTP Error Code Tests</h2>
+                <p class="section-description">Testing various HTTP error responses</p>
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h3>400 Bad Request <span class="badge badge-danger">Error</span></h3>
+                        <p>Invalid request error.</p>
+                        <a href="/api/reserves/?error=400" target="_blank">Test 400</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>401 Unauthorized <span class="badge badge-danger">Error</span></h3>
+                        <p>Authentication required error.</p>
+                        <a href="/api/reserves/?error=401" target="_blank">Test 401</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>403 Forbidden <span class="badge badge-danger">Error</span></h3>
+                        <p>Access denied error.</p>
+                        <a href="/api/reserves/?error=403" target="_blank">Test 403</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>404 Not Found <span class="badge badge-danger">Error</span></h3>
+                        <p>Resource not found error.</p>
+                        <a href="/api/reserves/?error=404" target="_blank">Test 404</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>429 Too Many Requests <span class="badge badge-danger">Error</span></h3>
+                        <p>Rate limit exceeded error.</p>
+                        <a href="/api/reserves/?error=429" target="_blank">Test 429</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>500 Internal Server Error <span class="badge badge-danger">Error</span></h3>
+                        <p>Server error.</p>
+                        <a href="/api/reserves/?error=500" target="_blank">Test 500</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>502 Bad Gateway <span class="badge badge-danger">Error</span></h3>
+                        <p>Invalid upstream response error.</p>
+                        <a href="/api/reserves/?error=502" target="_blank">Test 502</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>503 Service Unavailable <span class="badge badge-danger">Error</span></h3>
+                        <p>Service temporarily unavailable.</p>
+                        <a href="/api/reserves/?error=503" target="_blank">Test 503</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>504 Gateway Timeout <span class="badge badge-danger">Error</span></h3>
+                        <p>Upstream server timeout error.</p>
+                        <a href="/api/reserves/?error=504" target="_blank">Test 504</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Format Tests -->
+            <div class="section">
+                <h2>Response Format Tests</h2>
+                <p class="section-description">Testing malformed and invalid response formats</p>
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h3>Invalid JSON <span class="badge badge-danger">Parse Error</span></h3>
+                        <p>Malformed JSON that cannot be parsed.</p>
+                        <a href="/api/reserves/?scenario=invalid_json" target="_blank">Test Invalid JSON</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Empty Response <span class="badge badge-warning">Empty</span></h3>
+                        <p>200 OK but empty body.</p>
+                        <a href="/api/reserves/?scenario=empty_response" target="_blank">Test Empty Response</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Wrong Content-Type <span class="badge badge-warning">Wrong Type</span></h3>
+                        <p>Valid JSON but text/plain content-type.</p>
+                        <a href="/api/reserves/?scenario=wrong_content_type" target="_blank">Test Wrong Type</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Partial JSON <span class="badge badge-danger">Parse Error</span></h3>
+                        <p>JSON cut off mid-stream.</p>
+                        <a href="/api/reserves/?scenario=partial_json" target="_blank">Test Partial JSON</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Missing Fields <span class="badge badge-warning">Validation</span></h3>
+                        <p>Valid JSON but missing required fields.</p>
+                        <a href="/api/reserves/?scenario=missing_fields" target="_blank">Test Missing Fields</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Invalid Types <span class="badge badge-warning">Type Error</span></h3>
+                        <p>JSON with wrong data types.</p>
+                        <a href="/api/reserves/?scenario=invalid_types" target="_blank">Test Invalid Types</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Null Values <span class="badge badge-warning">Null</span></h3>
+                        <p>JSON with null values in all fields.</p>
+                        <a href="/api/reserves/?scenario=null_values" target="_blank">Test Null Values</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Validity Tests -->
+            <div class="section">
+                <h2>Data Validity Tests</h2>
+                <p class="section-description">Testing business logic validation</p>
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h3>Negative Values <span class="badge badge-warning">Invalid Data</span></h3>
+                        <p>Valid JSON with negative reserve amounts.</p>
+                        <a href="/api/reserves/?scenario=negative_values" target="_blank">Test Negative Values</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Under-backed Reserves <span class="badge badge-warning">Low Ratio</span></h3>
+                        <p>Reserve ratio less than 1.0 (90% backed).</p>
+                        <a href="/api/reserves/?scenario=underbacked" target="_blank">Test Under-backed</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connection Issues -->
+            <div class="section">
+                <h2>Connection Issues</h2>
+                <p class="section-description">Testing connection problems</p>
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h3>Connection Abort <span class="badge badge-danger">Connection Error</span></h3>
+                        <p>Connection drops mid-response.</p>
+                        <a href="/api/reserves/?scenario=connection_abort" target="_blank">Test Abort</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Combined Tests -->
+            <div class="section">
+                <h2>Combined Parameter Tests</h2>
+                <p class="section-description">Testing multiple parameters together</p>
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h3>Delayed Error (2s + 500) <span class="badge badge-danger">Error</span></h3>
+                        <p>2 second delay followed by 500 error.</p>
+                        <a href="/api/reserves/?delay=2000&error=500" target="_blank">Test Delayed Error</a>
+                    </div>
+
+                    <div class="test-card">
+                        <h3>Delayed 503 (3s + 503) <span class="badge badge-danger">Error</span></h3>
+                        <p>3 second delay followed by 503 unavailable.</p>
+                        <a href="/api/reserves/?delay=3000&error=503" target="_blank">Test Delayed 503</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Usage -->
+            <div class="url-list">
+                <h2>API Usage</h2>
+                <p>Base endpoint: <code>/api/reserves/</code> - Use query parameters to trigger scenarios.</p>
+
+                <div class="url-item">
+                    <span class="url-name">?scenario=</span>
+                    <span class="url-link">Named scenarios: under_limit, exceeds_limit, connection_timeout, invalid_json, etc.</span>
+                </div>
+
+                <div class="url-item">
+                    <span class="url-name">?delay=</span>
+                    <span class="url-link">Custom delay in milliseconds (e.g., ?delay=5000 for 5 seconds)</span>
+                </div>
+
+                <div class="url-item">
+                    <span class="url-name">?error=</span>
+                    <span class="url-link">HTTP error codes: 400, 401, 403, 404, 429, 500, 502, 503, 504</span>
+                </div>
+
+                <div class="url-item">
+                    <span class="url-name">?size=</span>
+                    <span class="url-link">Custom response size in KB (e.g., ?size=200 for 200 KB)</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Built for testing <a href="https://chain.link/cre" target="_blank">Chainlink Runtime Environment (CRE)</a> workflows</p>
+            <p><a href="https://github.com/ejacquier/por-api-server" target="_blank">View on GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
