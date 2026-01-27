@@ -190,19 +190,9 @@ app.get('/api/reserves/', async (req, res) => {
       await new Promise(resolve => setTimeout(resolve, 11000));
       return res.json(getNormalReserveData());
 
-    case 'capability_timeout':
-      // 3.5 minutes - exceeds 3 minute capability timeout
-      await new Promise(resolve => setTimeout(resolve, 210000));
-      return res.json(getNormalReserveData());
-
     case 'under_connection_timeout':
       // 9 seconds - should work
       await new Promise(resolve => setTimeout(resolve, 9000));
-      return res.json(getNormalReserveData());
-
-    case 'under_capability_timeout':
-      // 2.5 minutes - should work but slow
-      await new Promise(resolve => setTimeout(resolve, 150000));
       return res.json(getNormalReserveData());
 
     // Response format scenarios

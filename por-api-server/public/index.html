@@ -75,43 +75,6 @@
             transform: translateY(-2px);
         }
 
-        .hero-info {
-            background: #f0f4ff;
-            padding: 25px 30px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .hero-info h2 {
-            color: #375bd2;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .limits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .limit-card {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #375bd2;
-        }
-
-        .limit-card h4 {
-            color: #333;
-            font-size: 0.9em;
-            margin-bottom: 5px;
-        }
-
-        .limit-card .value {
-            color: #375bd2;
-            font-size: 1.4em;
-            font-weight: bold;
-        }
-
         .content {
             padding: 30px;
         }
@@ -136,7 +99,7 @@
 
         .test-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 15px;
             margin-top: 15px;
         }
@@ -167,7 +130,51 @@
             margin-bottom: 12px;
         }
 
-        .test-card a {
+        .test-card .url-box {
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-card .url-text {
+            flex-grow: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8em;
+            color: #495057;
+            word-break: break-all;
+        }
+
+        .test-card .copy-btn {
+            background: #375bd2;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .test-card .copy-btn:hover {
+            background: #1a3a8f;
+        }
+
+        .test-card .copy-btn.copied {
+            background: #28a745;
+        }
+
+        .test-card .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .test-card .test-btn {
             display: inline-block;
             background: linear-gradient(135deg, #375bd2 0%, #1a3a8f 100%);
             color: white;
@@ -178,7 +185,7 @@
             transition: all 0.3s ease;
         }
 
-        .test-card a:hover {
+        .test-card .test-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 12px rgba(55, 91, 210, 0.4);
         }
@@ -208,33 +215,20 @@
             color: #333;
         }
 
-        .health-check {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .health-check h3 {
-            margin-bottom: 10px;
-        }
-
-        .health-check a {
+        .health-btn {
             display: inline-block;
-            background: white;
-            color: #28a745;
+            margin-top: 30px;
             padding: 10px 20px;
-            border-radius: 5px;
+            background: #6c757d;
+            color: white;
             text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: background 0.2s ease;
         }
 
-        .health-check a:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        .health-btn:hover {
+            background: #5a6268;
         }
 
         .url-list {
@@ -278,7 +272,7 @@
         .url-name {
             font-weight: bold;
             color: #333;
-            min-width: 200px;
+            min-width: 120px;
         }
 
         .url-link {
@@ -286,27 +280,6 @@
             flex-grow: 1;
             padding: 0 10px;
             word-break: break-all;
-        }
-
-        .copy-btn {
-            background: #375bd2;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .copy-btn:hover {
-            background: #1a3a8f;
-            transform: scale(1.05);
-        }
-
-        .copy-btn:active {
-            background: #28a745;
         }
 
         footer {
@@ -343,35 +316,7 @@
             <a href="https://chain.link/cre" target="_blank" class="cre-link">Learn more about Chainlink CRE</a>
         </header>
 
-        <div class="hero-info">
-            <h2>CRE Limits Being Tested</h2>
-            <div class="limits-grid">
-                <div class="limit-card">
-                    <h4>HTTP Response Size</h4>
-                    <div class="value">100 KB</div>
-                </div>
-                <div class="limit-card">
-                    <h4>Connection Timeout</h4>
-                    <div class="value">10 sec</div>
-                </div>
-                <div class="limit-card">
-                    <h4>Capability Timeout</h4>
-                    <div class="value">3 min</div>
-                </div>
-                <div class="limit-card">
-                    <h4>Request Payload</h4>
-                    <div class="value">10 KB</div>
-                </div>
-            </div>
-        </div>
-
         <div class="content">
-            <!-- Health Check -->
-            <div class="health-check">
-                <h3>Server Health Check</h3>
-                <a href="/health" target="_blank">Check Server Status</a>
-            </div>
-
             <!-- Normal Case -->
             <div class="section">
                 <h2>Normal Response</h2>
@@ -380,7 +325,11 @@
                     <div class="test-card">
                         <h3>Normal Response <span class="badge badge-success">Should Work</span></h3>
                         <p>Returns standard proof of reserve data with all assets fully backed.</p>
-                        <a href="/api/reserves/" target="_blank">Test Normal Response</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/" target="_blank" class="test-btn">Test</a>
                     </div>
                 </div>
             </div>
@@ -393,31 +342,51 @@
                     <div class="test-card">
                         <h3>Under Limit (99 KB) <span class="badge badge-success">Should Work</span></h3>
                         <p>Response just under the 100 KB limit.</p>
-                        <a href="/api/reserves/?scenario=under_limit" target="_blank">Test Under Limit</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=under_limit</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=under_limit', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=under_limit" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>At Limit (100 KB) <span class="badge badge-warning">Edge Case</span></h3>
                         <p>Response exactly at the 100 KB limit.</p>
-                        <a href="/api/reserves/?scenario=at_limit" target="_blank">Test At Limit</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=at_limit</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=at_limit', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=at_limit" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Exceeds Limit (150 KB) <span class="badge badge-danger">Should Fail</span></h3>
                         <p>Response exceeds the 100 KB limit - CRE should reject.</p>
-                        <a href="/api/reserves/?scenario=exceeds_limit" target="_blank">Test Exceeds Limit</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=exceeds_limit</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=exceeds_limit', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=exceeds_limit" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Way Over Limit (500 KB) <span class="badge badge-danger">Should Fail</span></h3>
                         <p>Response way over the limit - definitely fails in CRE.</p>
-                        <a href="/api/reserves/?scenario=way_over_limit" target="_blank">Test Way Over</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=way_over_limit</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=way_over_limit', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=way_over_limit" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Custom Size (200 KB) <span class="badge badge-danger">Should Fail</span></h3>
                         <p>Custom 200 KB response for testing.</p>
-                        <a href="/api/reserves/?size=200" target="_blank">Test 200 KB</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?size=200</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?size=200', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?size=200" target="_blank" class="test-btn">Test</a>
                     </div>
                 </div>
             </div>
@@ -425,42 +394,46 @@
             <!-- Timeout Tests -->
             <div class="section">
                 <h2>Timeout Tests</h2>
-                <p class="section-description">Testing CRE's 10 second connection timeout and 3 minute capability timeout</p>
+                <p class="section-description">Testing CRE's 10 second connection timeout</p>
                 <div class="test-grid">
                     <div class="test-card">
                         <h3>Connection Timeout (11s) <span class="badge badge-danger">Should Timeout</span></h3>
                         <p>11 second delay - exceeds 10 second connection timeout.</p>
-                        <a href="/api/reserves/?scenario=connection_timeout" target="_blank">Test Connection Timeout</a>
-                    </div>
-
-                    <div class="test-card">
-                        <h3>Capability Timeout (3.5m) <span class="badge badge-danger">Should Timeout</span></h3>
-                        <p>3.5 minute delay - exceeds capability timeout. Very slow!</p>
-                        <a href="/api/reserves/?scenario=capability_timeout" target="_blank">Test Capability Timeout</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=connection_timeout</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=connection_timeout', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=connection_timeout" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Under Connection Timeout (9s) <span class="badge badge-success">Should Work</span></h3>
                         <p>9 second delay - just under connection timeout.</p>
-                        <a href="/api/reserves/?scenario=under_connection_timeout" target="_blank">Test 9s Delay</a>
-                    </div>
-
-                    <div class="test-card">
-                        <h3>Under Capability Timeout (2.5m) <span class="badge badge-success">Should Work</span></h3>
-                        <p>2.5 minute delay - under capability timeout. Slow!</p>
-                        <a href="/api/reserves/?scenario=under_capability_timeout" target="_blank">Test 2.5m Delay</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=under_connection_timeout</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=under_connection_timeout', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=under_connection_timeout" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Short Delay (2s) <span class="badge badge-success">Should Work</span></h3>
                         <p>2 second delay for quick timeout testing.</p>
-                        <a href="/api/reserves/?delay=2000" target="_blank">Test 2s Delay</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?delay=2000</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?delay=2000', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?delay=2000" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Medium Delay (5s) <span class="badge badge-success">Should Work</span></h3>
                         <p>5 second delay for moderate timeout testing.</p>
-                        <a href="/api/reserves/?delay=5000" target="_blank">Test 5s Delay</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?delay=5000</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?delay=5000', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?delay=5000" target="_blank" class="test-btn">Test</a>
                     </div>
                 </div>
             </div>
@@ -473,55 +446,91 @@
                     <div class="test-card">
                         <h3>400 Bad Request <span class="badge badge-danger">Error</span></h3>
                         <p>Invalid request error.</p>
-                        <a href="/api/reserves/?error=400" target="_blank">Test 400</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?error=400</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?error=400', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?error=400" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>401 Unauthorized <span class="badge badge-danger">Error</span></h3>
                         <p>Authentication required error.</p>
-                        <a href="/api/reserves/?error=401" target="_blank">Test 401</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?error=401</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?error=401', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?error=401" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>403 Forbidden <span class="badge badge-danger">Error</span></h3>
                         <p>Access denied error.</p>
-                        <a href="/api/reserves/?error=403" target="_blank">Test 403</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?error=403</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?error=403', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?error=403" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>404 Not Found <span class="badge badge-danger">Error</span></h3>
                         <p>Resource not found error.</p>
-                        <a href="/api/reserves/?error=404" target="_blank">Test 404</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?error=404</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?error=404', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?error=404" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>429 Too Many Requests <span class="badge badge-danger">Error</span></h3>
                         <p>Rate limit exceeded error.</p>
-                        <a href="/api/reserves/?error=429" target="_blank">Test 429</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?error=429</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?error=429', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?error=429" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>500 Internal Server Error <span class="badge badge-danger">Error</span></h3>
                         <p>Server error.</p>
-                        <a href="/api/reserves/?error=500" target="_blank">Test 500</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?error=500</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?error=500', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?error=500" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>502 Bad Gateway <span class="badge badge-danger">Error</span></h3>
                         <p>Invalid upstream response error.</p>
-                        <a href="/api/reserves/?error=502" target="_blank">Test 502</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?error=502</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?error=502', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?error=502" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>503 Service Unavailable <span class="badge badge-danger">Error</span></h3>
                         <p>Service temporarily unavailable.</p>
-                        <a href="/api/reserves/?error=503" target="_blank">Test 503</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?error=503</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?error=503', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?error=503" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>504 Gateway Timeout <span class="badge badge-danger">Error</span></h3>
                         <p>Upstream server timeout error.</p>
-                        <a href="/api/reserves/?error=504" target="_blank">Test 504</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?error=504</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?error=504', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?error=504" target="_blank" class="test-btn">Test</a>
                     </div>
                 </div>
             </div>
@@ -534,43 +543,71 @@
                     <div class="test-card">
                         <h3>Invalid JSON <span class="badge badge-danger">Parse Error</span></h3>
                         <p>Malformed JSON that cannot be parsed.</p>
-                        <a href="/api/reserves/?scenario=invalid_json" target="_blank">Test Invalid JSON</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=invalid_json</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=invalid_json', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=invalid_json" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Empty Response <span class="badge badge-warning">Empty</span></h3>
                         <p>200 OK but empty body.</p>
-                        <a href="/api/reserves/?scenario=empty_response" target="_blank">Test Empty Response</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=empty_response</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=empty_response', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=empty_response" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Wrong Content-Type <span class="badge badge-warning">Wrong Type</span></h3>
                         <p>Valid JSON but text/plain content-type.</p>
-                        <a href="/api/reserves/?scenario=wrong_content_type" target="_blank">Test Wrong Type</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=wrong_content_type</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=wrong_content_type', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=wrong_content_type" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Partial JSON <span class="badge badge-danger">Parse Error</span></h3>
                         <p>JSON cut off mid-stream.</p>
-                        <a href="/api/reserves/?scenario=partial_json" target="_blank">Test Partial JSON</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=partial_json</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=partial_json', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=partial_json" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Missing Fields <span class="badge badge-warning">Validation</span></h3>
                         <p>Valid JSON but missing required fields.</p>
-                        <a href="/api/reserves/?scenario=missing_fields" target="_blank">Test Missing Fields</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=missing_fields</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=missing_fields', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=missing_fields" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Invalid Types <span class="badge badge-warning">Type Error</span></h3>
                         <p>JSON with wrong data types.</p>
-                        <a href="/api/reserves/?scenario=invalid_types" target="_blank">Test Invalid Types</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=invalid_types</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=invalid_types', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=invalid_types" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Null Values <span class="badge badge-warning">Null</span></h3>
                         <p>JSON with null values in all fields.</p>
-                        <a href="/api/reserves/?scenario=null_values" target="_blank">Test Null Values</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=null_values</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=null_values', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=null_values" target="_blank" class="test-btn">Test</a>
                     </div>
                 </div>
             </div>
@@ -583,13 +620,21 @@
                     <div class="test-card">
                         <h3>Negative Values <span class="badge badge-warning">Invalid Data</span></h3>
                         <p>Valid JSON with negative reserve amounts.</p>
-                        <a href="/api/reserves/?scenario=negative_values" target="_blank">Test Negative Values</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=negative_values</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=negative_values', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=negative_values" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Under-backed Reserves <span class="badge badge-warning">Low Ratio</span></h3>
                         <p>Reserve ratio less than 1.0 (90% backed).</p>
-                        <a href="/api/reserves/?scenario=underbacked" target="_blank">Test Under-backed</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=underbacked</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=underbacked', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=underbacked" target="_blank" class="test-btn">Test</a>
                     </div>
                 </div>
             </div>
@@ -602,7 +647,11 @@
                     <div class="test-card">
                         <h3>Connection Abort <span class="badge badge-danger">Connection Error</span></h3>
                         <p>Connection drops mid-response.</p>
-                        <a href="/api/reserves/?scenario=connection_abort" target="_blank">Test Abort</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?scenario=connection_abort</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=connection_abort', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?scenario=connection_abort" target="_blank" class="test-btn">Test</a>
                     </div>
                 </div>
             </div>
@@ -615,13 +664,21 @@
                     <div class="test-card">
                         <h3>Delayed Error (2s + 500) <span class="badge badge-danger">Error</span></h3>
                         <p>2 second delay followed by 500 error.</p>
-                        <a href="/api/reserves/?delay=2000&error=500" target="_blank">Test Delayed Error</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?delay=2000&error=500</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?delay=2000&error=500', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?delay=2000&error=500" target="_blank" class="test-btn">Test</a>
                     </div>
 
                     <div class="test-card">
                         <h3>Delayed 503 (3s + 503) <span class="badge badge-danger">Error</span></h3>
                         <p>3 second delay followed by 503 unavailable.</p>
-                        <a href="/api/reserves/?delay=3000&error=503" target="_blank">Test Delayed 503</a>
+                        <div class="url-box">
+                            <span class="url-text">/api/reserves/?delay=3000&error=503</span>
+                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?delay=3000&error=503', this)">Copy</button>
+                        </div>
+                        <a href="/api/reserves/?delay=3000&error=503" target="_blank" class="test-btn">Test</a>
                     </div>
                 </div>
             </div>
@@ -651,6 +708,9 @@
                     <span class="url-link">Custom response size in KB (e.g., ?size=200 for 200 KB)</span>
                 </div>
             </div>
+
+            <!-- Health Check -->
+            <a href="/health" target="_blank" class="health-btn">Health Check</a>
         </div>
 
         <footer>
@@ -658,5 +718,22 @@
             <p><a href="https://github.com/ejacquier/por-api-server" target="_blank">View on GitHub</a></p>
         </footer>
     </div>
+
+    <script>
+        function copyUrl(path, btn) {
+            const fullUrl = window.location.origin + path;
+            navigator.clipboard.writeText(fullUrl).then(function() {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+    </script>
 </body>
 </html>
