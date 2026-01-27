@@ -1,0 +1,22 @@
+{
+  "name": "por-api-server",
+  "version": "1.0.0",
+  "description": "REST API server for testing Proof of Reserve workflows with Chainlink CRE",
+  "main": "server.js",
+  "scripts": {
+    "start": "bun run server.js",
+    "dev": "bun --watch server.js"
+  },
+  "keywords": [
+    "proof-of-reserve",
+    "chainlink",
+    "cre",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
