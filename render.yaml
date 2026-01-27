@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: por-api-server
+    runtime: node
+    rootDir: por-api-server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
