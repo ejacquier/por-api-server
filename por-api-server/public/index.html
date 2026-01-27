@@ -637,33 +637,6 @@
                 </div>
             </div>
 
-            <!-- Data Validity Tests -->
-            <div class="section">
-                <h2>Data Validity Tests</h2>
-                <p class="section-description">Testing business logic validation</p>
-                <div class="test-grid">
-                    <div class="test-card">
-                        <h3>Negative Values <span class="badge badge-warning">Invalid Data</span></h3>
-                        <p>Valid JSON with negative reserve amounts.</p>
-                        <div class="url-box">
-                            <span class="url-text">/api/reserves/?scenario=negative_values</span>
-                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=negative_values', this)">Copy</button>
-                        </div>
-                        <a href="/api/reserves/?scenario=negative_values" target="_blank" class="test-btn">Test</a>
-                    </div>
-
-                    <div class="test-card">
-                        <h3>Under-backed Reserves <span class="badge badge-warning">Low Ratio</span></h3>
-                        <p>Reserve ratio less than 1.0 (90% backed).</p>
-                        <div class="url-box">
-                            <span class="url-text">/api/reserves/?scenario=underbacked</span>
-                            <button class="copy-btn" onclick="copyUrl('/api/reserves/?scenario=underbacked', this)">Copy</button>
-                        </div>
-                        <a href="/api/reserves/?scenario=underbacked" target="_blank" class="test-btn">Test</a>
-                    </div>
-                </div>
-            </div>
-
             <!-- Connection Issues -->
             <div class="section">
                 <h2>Connection Issues</h2>
