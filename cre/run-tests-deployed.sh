@@ -3,6 +3,9 @@
 # CRE Deployed Workflow Test Runner
 # Runs all test scenarios against a DEPLOYED POR workflow via HTTP trigger
 #
+# Rate Limit: CRE enforces a rate limit of 1 trigger per 30 seconds (burst: 3)
+# This script automatically handles the rate limiting with delays between tests.
+#
 # Prerequisites:
 #   1. Copy .env.example to .env and configure:
 #      - PRIVATE_KEY: Your EVM private key (must be authorized in workflow)
@@ -11,8 +14,8 @@
 #   2. Install dependencies: cd cre-sdk-typescript/packages/cre-http-trigger && bun install
 #
 # Usage:
-#   ./run-deployed-tests.sh              # Run all tests
-#   ./run-deployed-tests.sh under_limit  # Run single test
+#   ./run-tests-deployed.sh              # Run all tests (with rate limiting)
+#   ./run-tests-deployed.sh under_limit  # Run single test (no delay)
 
 set -e
 
@@ -23,6 +26,10 @@ ENV_FILE="$SCRIPT_DIR/.env"
 BASE_URL="https://por-api-server.onrender.com/api/reserves"
 TRIGGER_PORT=2000
 TRIGGER_URL="http://localhost:$TRIGGER_PORT"
+
+# Rate limiting configuration (CRE quota)
+RATE_LIMIT_BURST=3          # Initial burst allowed
+RATE_LIMIT_INTERVAL=30      # Seconds between requests after burst
 
 # Colors for output
 RED='\033[0;31m'
@@ -36,6 +43,7 @@ NC='\033[0m' # No Color
 PASSED=0
 FAILED=0
 TOTAL=0
+BURST_REMAINING=$RATE_LIMIT_BURST
 
 # Cleanup function
 cleanup() {
@@ -138,13 +146,34 @@ EOF
     exit 1
 }
 
+# Wait for rate limit with countdown
+wait_for_rate_limit() {
+    if [ "$BURST_REMAINING" -gt 0 ]; then
+        BURST_REMAINING=$((BURST_REMAINING - 1))
+        return
+    fi
+
+    echo -e "\n${YELLOW}⏳ Rate limit: waiting ${RATE_LIMIT_INTERVAL}s before next trigger...${NC}"
+    for ((i=RATE_LIMIT_INTERVAL; i>0; i--)); do
+        printf "\r${CYAN}   Next trigger in %2d seconds...${NC}" "$i"
+        sleep 1
+    done
+    printf "\r${GREEN}   Ready to trigger!              ${NC}\n"
+}
+
 # Run a single test case
 run_test() {
     local test_name="$1"
     local url="$2"
     local expected_success="$3"  # "true" or "false"
+    local skip_rate_limit="$4"   # "true" to skip rate limit wait
 
     TOTAL=$((TOTAL + 1))
+
+    # Apply rate limiting (unless skipped for single test)
+    if [ "$skip_rate_limit" != "true" ]; then
+        wait_for_rate_limit
+    fi
 
     echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${YELLOW}Test ${TOTAL}: ${test_name}${NC}"
@@ -183,12 +212,37 @@ print_header() {
     echo "╔══════════════════════════════════════════════════════════════╗"
     echo "║       CRE POR Workflow - Deployed Tests                      ║"
     echo "║       (Triggers real workflow executions)                    ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "║  Rate Limit: Burst 3, then 1 per 30s                         ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
 }
 
+# Calculate estimated time
+calculate_eta() {
+    local num_tests=$1
+    local burst=$RATE_LIMIT_BURST
+    local interval=$RATE_LIMIT_INTERVAL
+
+    if [ "$num_tests" -le "$burst" ]; then
+        echo "~1 minute"
+    else
+        local after_burst=$((num_tests - burst))
+        local total_seconds=$((after_burst * interval))
+        local minutes=$((total_seconds / 60))
+        local seconds=$((total_seconds % 60))
+        echo "~${minutes}m ${seconds}s"
+    fi
+}
+
 # Run all tests
 run_all_tests() {
+    local total_tests=25
+    local eta=$(calculate_eta $total_tests)
+
+    echo -e "${CYAN}Running ${total_tests} tests. Estimated time: ${eta}${NC}"
+    echo -e "${CYAN}(First ${RATE_LIMIT_BURST} tests run immediately, then ${RATE_LIMIT_INTERVAL}s delay between each)${NC}"
+
     # ============================================================================
     # SIZE LIMIT TESTS
     # ============================================================================
@@ -273,11 +327,11 @@ main() {
     start_trigger_server
 
     if [ -n "$1" ]; then
-        # Run single test
+        # Run single test (skip rate limit)
         echo -e "\n${YELLOW}Running single test: $1${NC}"
-        run_test "$1" "${BASE_URL}/?scenario=$1" "unknown"
+        run_test "$1" "${BASE_URL}/?scenario=$1" "unknown" "true"
     else
-        # Run all tests
+        # Run all tests (with rate limiting)
         run_all_tests
     fi
 
