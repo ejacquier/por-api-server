@@ -1,0 +1,3 @@
+[submodule "cre/cre-sdk-typescript"]
+	path = cre/cre-sdk-typescript
+	url = https://github.com/smartcontractkit/cre-sdk-typescript.git

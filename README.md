@@ -6,14 +6,19 @@ A comprehensive testing suite for Chainlink Runtime Environment (CRE) Proof of R
 
 ```
 cre-por-testing/
-├── por-api-server/       # Mock REST API server for testing
-│   ├── server.js         # Express server with test scenarios
-│   ├── scenarios.html    # Interactive browser UI
-│   ├── TEST_CASES.md     # Complete test documentation
-│   └── README.md         # API server documentation
+├── por-api-server/           # Mock REST API server for testing
+│   ├── server.js             # Express server with test scenarios
+│   ├── scenarios.html        # Interactive browser UI
+│   └── TEST_CASES.md         # Complete test documentation
 │
-└── cre/                  # CRE workflows (to be created)
-    └── (your CRE workflow code)
+└── cre/                      # CRE workflow and testing tools
+    ├── por-workflow/         # POR workflow code
+    │   ├── main.ts           # Workflow implementation
+    │   └── config.*.json     # Environment configs
+    ├── cre-sdk-typescript/   # HTTP trigger tool (submodule)
+    ├── run-all-tests.sh      # Run all tests in SIMULATION
+    ├── run-deployed-tests.sh # Run all tests on DEPLOYED workflow
+    └── .env.example          # Configuration template
 ```
 
 ## Overview
@@ -50,21 +55,56 @@ The server runs on `http://localhost:3000`
 
 Open `por-api-server/scenarios.html` in your browser to access the interactive test interface with clickable links for all scenarios.
 
-### 3. Run the CRE Workflow
+### 3. Run Tests in Simulation
 
 ```bash
 cd cre
 
-# Run a single test
+# Run a single test in simulation
 cre workflow simulate ./por-workflow \
   --non-interactive \
   --trigger-index 0 \
   --http-payload '{"testCase":"under_limit","url":"https://por-api-server.onrender.com/api/reserves/?scenario=under_limit"}' \
   --target staging-settings
 
-# Run all tests
+# Run all tests in simulation
 ./run-all-tests.sh
 ```
+
+### 4. Run Tests on Deployed Workflow
+
+After deploying your workflow to CRE, you can run the same tests against the deployed version:
+
+```bash
+cd cre
+
+# 1. Initialize the HTTP trigger tool (first time only)
+git submodule update --init --recursive
+cd cre-sdk-typescript/packages/cre-http-trigger && bun install && cd ../../..
+
+# 2. Configure your environment
+cp .env.example .env
+# Edit .env with your values:
+#   PRIVATE_KEY=0x...    (must match an authorized key in workflow)
+#   GATEWAY_URL=https://01.gateway.zone-a.cre.chain.link
+#   WORKFLOW_ID=0x...    (from CRE UI after deployment)
+
+# 3. Run all tests against deployed workflow
+./run-deployed-tests.sh
+
+# Or run a single test
+./run-deployed-tests.sh under_limit
+```
+
+**Configuration (.env):**
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `PRIVATE_KEY` | EVM private key (must be authorized in workflow config) | `0x1234...` |
+| `GATEWAY_URL` | CRE Gateway URL | `https://01.gateway.zone-a.cre.chain.link` |
+| `WORKFLOW_ID` | Deployed workflow ID (64-char hex) | `0xabcd...` |
+
+View execution results at: https://cre.chain.link/workflows
 
 ## HTTP Trigger Payloads
 
