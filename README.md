@@ -32,7 +32,7 @@ A REST API server that simulates various proof of reserve scenarios for testing 
 
 ### cre
 
-Directory for your CRE workflow that will consume the API server to test proof of reserve scenarios.
+CRE workflow that fetches proof of reserve data via HTTP trigger. The workflow accepts a test case name and URL, fetches the data, and returns the result.
 
 ## Quick Start
 
@@ -50,44 +50,129 @@ The server runs on `http://localhost:3000`
 
 Open `por-api-server/scenarios.html` in your browser to access the interactive test interface with clickable links for all scenarios.
 
-### 3. Create Your CRE Workflow
+### 3. Run the CRE Workflow
 
-The `cre/` directory is ready for your Chainlink Runtime Environment workflow code that will test against the API server.
+```bash
+cd cre
 
-## Example CRE Workflow Usage
+# Run a single test
+cre workflow simulate ./por-workflow \
+  --non-interactive \
+  --trigger-index 0 \
+  --http-payload '{"testCase":"under_limit","url":"https://por-api-server.onrender.com/api/reserves/?scenario=under_limit"}' \
+  --target staging-settings
 
-```typescript
-import { http } from "@chainlink/cre-typescript-sdk/capabilities";
+# Run all tests
+./run-all-tests.sh
+```
 
-// Normal case - should succeed
-const normal = await http.get("http://localhost:3000/api/reserves/");
+## HTTP Trigger Payloads
 
-// Test size limit - should fail (exceeds 100 KB)
-try {
-  const oversized = await http.get(
-    "http://localhost:3000/api/reserves/?scenario=exceeds_limit"
-  );
-} catch (error) {
-  console.error("Size limit error:", error);
-}
+The CRE workflow accepts HTTP trigger payloads with `testCase` and `url` fields. Below are all available test cases:
 
-// Test timeout - should fail (exceeds 10s connection timeout)
-try {
-  const timeout = await http.get(
-    "http://localhost:3000/api/reserves/?scenario=connection_timeout"
-  );
-} catch (error) {
-  console.error("Timeout error:", error);
-}
+### Size Limit Tests
 
-// Test HTTP errors
-try {
-  const serverError = await http.get(
-    "http://localhost:3000/api/reserves/?error=500"
-  );
-} catch (error) {
-  console.error("Server error:", error);
-}
+```json
+{"testCase":"under_limit","url":"https://por-api-server.onrender.com/api/reserves/?scenario=under_limit"}
+```
+```json
+{"testCase":"at_limit","url":"https://por-api-server.onrender.com/api/reserves/?scenario=at_limit"}
+```
+```json
+{"testCase":"exceeds_limit","url":"https://por-api-server.onrender.com/api/reserves/?scenario=exceeds_limit"}
+```
+```json
+{"testCase":"way_over_limit","url":"https://por-api-server.onrender.com/api/reserves/?scenario=way_over_limit"}
+```
+
+### Timeout Tests
+
+```json
+{"testCase":"under_connection_timeout","url":"https://por-api-server.onrender.com/api/reserves/?scenario=under_connection_timeout"}
+```
+```json
+{"testCase":"connection_timeout","url":"https://por-api-server.onrender.com/api/reserves/?scenario=connection_timeout"}
+```
+
+### Response Format Tests
+
+```json
+{"testCase":"invalid_json","url":"https://por-api-server.onrender.com/api/reserves/?scenario=invalid_json"}
+```
+```json
+{"testCase":"empty_response","url":"https://por-api-server.onrender.com/api/reserves/?scenario=empty_response"}
+```
+```json
+{"testCase":"wrong_content_type","url":"https://por-api-server.onrender.com/api/reserves/?scenario=wrong_content_type"}
+```
+```json
+{"testCase":"partial_json","url":"https://por-api-server.onrender.com/api/reserves/?scenario=partial_json"}
+```
+```json
+{"testCase":"missing_fields","url":"https://por-api-server.onrender.com/api/reserves/?scenario=missing_fields"}
+```
+```json
+{"testCase":"invalid_types","url":"https://por-api-server.onrender.com/api/reserves/?scenario=invalid_types"}
+```
+```json
+{"testCase":"null_values","url":"https://por-api-server.onrender.com/api/reserves/?scenario=null_values"}
+```
+
+### Data Validity Tests
+
+```json
+{"testCase":"negative_values","url":"https://por-api-server.onrender.com/api/reserves/?scenario=negative_values"}
+```
+```json
+{"testCase":"underbacked","url":"https://por-api-server.onrender.com/api/reserves/?scenario=underbacked"}
+```
+
+### Connection Tests
+
+```json
+{"testCase":"connection_abort","url":"https://por-api-server.onrender.com/api/reserves/?scenario=connection_abort"}
+```
+
+### HTTP Error Tests
+
+```json
+{"testCase":"error_400","url":"https://por-api-server.onrender.com/api/reserves/?error=400"}
+```
+```json
+{"testCase":"error_401","url":"https://por-api-server.onrender.com/api/reserves/?error=401"}
+```
+```json
+{"testCase":"error_403","url":"https://por-api-server.onrender.com/api/reserves/?error=403"}
+```
+```json
+{"testCase":"error_404","url":"https://por-api-server.onrender.com/api/reserves/?error=404"}
+```
+```json
+{"testCase":"error_429","url":"https://por-api-server.onrender.com/api/reserves/?error=429"}
+```
+```json
+{"testCase":"error_500","url":"https://por-api-server.onrender.com/api/reserves/?error=500"}
+```
+```json
+{"testCase":"error_502","url":"https://por-api-server.onrender.com/api/reserves/?error=502"}
+```
+```json
+{"testCase":"error_503","url":"https://por-api-server.onrender.com/api/reserves/?error=503"}
+```
+```json
+{"testCase":"error_504","url":"https://por-api-server.onrender.com/api/reserves/?error=504"}
+```
+
+### Custom Size Test
+
+```json
+{"testCase":"custom_size_50kb","url":"https://por-api-server.onrender.com/api/reserves/?size=50"}
+```
+
+### Custom Delay Test
+
+```json
+{"testCase":"custom_delay_5s","url":"https://por-api-server.onrender.com/api/reserves/?delay=5000"}
 ```
 
 ## Test Scenarios
