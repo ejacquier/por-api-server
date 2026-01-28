@@ -16,8 +16,8 @@ cre-por-testing/
     │   ├── main.ts           # Workflow implementation
     │   └── config.*.json     # Environment configs
     ├── cre-sdk-typescript/   # HTTP trigger tool (submodule)
-    ├── run-all-tests.sh      # Run all tests in SIMULATION
-    ├── run-deployed-tests.sh # Run all tests on DEPLOYED workflow
+    ├── run-tests-simulation.sh      # Run all tests in SIMULATION
+    ├── run-tests-deployed.sh # Run all tests on DEPLOYED workflow
     └── .env.example          # Configuration template
 ```
 
@@ -68,7 +68,7 @@ cre workflow simulate ./por-workflow \
   --target staging-settings
 
 # Run all tests in simulation
-./run-all-tests.sh
+./run-tests-simulation.sh
 ```
 
 ### 4. Run Tests on Deployed Workflow
@@ -90,10 +90,10 @@ cp .env.example .env
 #   WORKFLOW_ID=0x...    (from CRE UI after deployment)
 
 # 3. Run all tests against deployed workflow
-./run-deployed-tests.sh
+./run-tests-deployed.sh
 
 # Or run a single test
-./run-deployed-tests.sh under_limit
+./run-tests-deployed.sh under_limit
 ```
 
 **Configuration (.env):**
