@@ -133,8 +133,6 @@ const onHttpTrigger = (runtime: Runtime<Config>, payload: HTTPPayload): string =
 		// Create HTTP client and fetch data
 		const httpClient = new HTTPClient()
 
-		runtime.log(`Fetching data from URL...`)
-
 		const reserveInfo = httpClient
 			.sendRequest(
 				runtime,

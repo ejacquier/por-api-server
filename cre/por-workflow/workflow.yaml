@@ -17,7 +17,7 @@
 # ==========================================================================
 staging-settings:
   user-workflow:
-    workflow-name: "por-workflow-staging"
+    workflow-name: "por-workflow-test"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.staging.json"
